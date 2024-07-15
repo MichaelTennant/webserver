@@ -25,14 +25,15 @@ uint32_t stu32(const char* str, unsigned char* error) {
     }
 
     // If input string longer then 9 digits long (and no leading zeros), 
-    // output will be out of range.
+    // output will always be out of range.
     if (digits > 9) {
         *error = ERANGE;
         return 0;
     }
 
+    // NOTE: UNDEFINED BEHAVIOUR ON 32 BIT MACHINES FOR INPUTS ["5000000000"-"999999999"]
     for (int i = digits - 1; i >= 0; i--) {
-        short digit = str[i] - 48;   // '0' starts at ascii index 48
+        short digit = str[i] - 48;   // ['0'-'9'] at ascii indices [48-57]
         
         if (digit < 0 || 10 <= digit) {
             *error = EDOM;
@@ -82,6 +83,11 @@ int main(int argc, char* argv[]) {
 
         if ((strcmp(argv[i], "-s") && strcmp(argv[i], "--serve")) == 0) {
             i++;
+            if (argc <= i) {
+                // TODO: EXPECTED MORE ARGUMENTS ERROR MESSAGE
+                return EINVAL;
+            }
+
             if (strcmp(argv[i], "http") == 0) {
                 serve_http = true;
                 continue;
@@ -106,6 +112,11 @@ int main(int argc, char* argv[]) {
 
         if ((strcmp(argv[i], "-d") && strcmp(argv[i], "--root-path")) == 0) {
             i++;
+            if (argc <= i) {
+                // TODO: EXPECTED MORE ARGUMENTS ERROR MESSAGE
+                return EINVAL;
+            }
+
             struct stat path_stat;
             if (stat(argv[i], &path_stat)) {
                 // TODO: BETTER ERR MESSAGE
@@ -126,6 +137,11 @@ int main(int argc, char* argv[]) {
 
         if (strcmp(argv[i], "--http_port") == 0) {
             i++;
+            if (argc <= i) {
+                // TODO: EXPECTED MORE ARGUMENTS ERROR MESSAGE
+                return EINVAL;
+            }
+
             unsigned char error = 0;
             http_port = stu32(argv[i], &error);
 
@@ -141,6 +157,11 @@ int main(int argc, char* argv[]) {
 
         if (strcmp(argv[i], "--https_port") == 0) {
             i++;
+            if (argc <= i) {
+                // TODO: EXPECTED MORE ARGUMENTS ERROR MESSAGE
+                return EINVAL;
+            }
+
             unsigned char error = 0;
             https_port = stu32(argv[i], &error);
 
